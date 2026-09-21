@@ -19,7 +19,6 @@ import {
   Bell,
   Info,
   Award,
-  Sparkles,
 } from 'lucide-react';
 import {
   ScheduleAnimeItem,
@@ -27,7 +26,13 @@ import {
   AnimeStreamingLink,
 } from '../services/jikanService';
 import { getAggregatedStreamingLinks } from '../services/multiApiAggregatorService';
-import { formatUpcomingReleaseForecast, isFinalEpisodeOfSeason, detectAnimePartInfo, getFinalEpisodeLabels } from '../services/scheduleLifecycleService';
+import {
+  formatUpcomingReleaseForecast,
+  isFinalEpisodeOfSeason,
+  detectAnimePartInfo,
+  getFinalEpisodeLabels,
+  hasAnimeStartedBroadcasting,
+} from '../services/scheduleLifecycleService';
 import { fetchFreshAnimeDetails } from '../services/animeSyncService';
 import { fetchAnimeSpecificNews, GUARANTEED_ANIME_ARTWORKS } from '../services/newsService';
 import { checkIsSameFranchise, getFranchiseRootTitle } from '../services/franchiseService';
@@ -357,6 +362,13 @@ export const ScheduleDetailModal: React.FC<ScheduleDetailModalProps> = ({
   const isFinalEp = anime ? isFinalEpisodeOfSeason(anime) : false;
   const finalEpLabels = anime ? getFinalEpisodeLabels(anime) : { badgeLabel: 'Último Ep. Programado', modalLabel: '' };
 
+  // Só considera 'Em Exibição' se o anime já estreou de fato na data/hora real (evita que animes futuros como Shangri-La Frontier 3 mostrem 'Em exibição')
+  const isActuallyLiveAiring = Boolean(
+    anime &&
+    hasAnimeStartedBroadcasting(anime) &&
+    (effectiveAggregatedStatus.isCurrentlyAiring || anime.status === 'Currently Airing')
+  );
+
   return (
     <div
       id="schedule-detail-modal-backdrop"
@@ -466,7 +478,7 @@ export const ScheduleDetailModal: React.FC<ScheduleDetailModalProps> = ({
         {/* Corpo com rolagem */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar pt-4 sm:pt-5 bg-black">
           {/* Card de Previsão de Lançamento / Horário de Transmissão / Último Episódio */}
-          {effectiveAggregatedStatus.isCurrentlyAiring || (anime.nextEpisode && anime.nextEpisode.episode > 0) ? (
+          {isActuallyLiveAiring ? (
             <div className="px-3.5 py-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-2.5 text-xs">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
@@ -500,33 +512,32 @@ export const ScheduleDetailModal: React.FC<ScheduleDetailModalProps> = ({
                       </button>
                     </span>
 
-                    {/* Popover discreto ao clicar no ícone de informação */}
+                    {/* Popover ajustado para mobile garantindo que não corte nas bordas da tela */}
                     {showFinalEpInfo && (
-                      <div className="absolute right-0 top-full mt-1.5 z-50 w-64 p-2.5 rounded-xl bg-[#14141d] border border-amber-500/40 text-[11px] text-zinc-300 shadow-2xl shadow-black">
+                      <div className="fixed inset-x-4 top-auto mt-2 sm:absolute sm:right-0 sm:top-full sm:inset-x-auto sm:w-72 max-w-[calc(100vw-2rem)] p-3 rounded-xl bg-[#14141d] border border-amber-500/40 text-[11px] text-zinc-300 shadow-2xl shadow-black z-50">
                         <div className="flex items-start justify-between gap-1.5 font-bold text-amber-400 mb-1">
-                          <span>{finalEpLabels.modalLabel || 'Último Episódio Programado'}</span>
+                          <span className="leading-snug">{finalEpLabels.modalLabel || 'Último Episódio Programado'}</span>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowFinalEpInfo(false);
                             }}
-                            className="text-zinc-400 hover:text-white cursor-pointer px-1 text-xs"
+                            className="text-zinc-400 hover:text-white cursor-pointer px-1 text-xs shrink-0"
                           >
                             ✕
                           </button>
                         </div>
                         <p className="leading-relaxed text-[10.5px] text-zinc-300">
-                          Caso a temporada seja dividida em cours ou tenha continuação anunciada (Parte 2), a nova fase estreará na agenda de lançamentos mantendo seu vínculo com a franquia.
+                          Caso a temporada seja dividida em cours ou tenha continuação anunciada, a nova fase estreará na agenda de lançamentos mantendo seu vínculo com a franquia.
                         </p>
                       </div>
                     )}
                   </div>
                 )}
                 {partInfo.isSplitCourOrPart && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600 text-white font-black text-[10px] tracking-wide uppercase shadow-xs">
-                    <Sparkles className="w-3 h-3 text-indigo-200" />
-                    {partInfo.partLabel}
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-600 text-white font-black text-[10px] tracking-wide uppercase shadow-xs">
+                    Continuação
                   </span>
                 )}
                 {anime.nextEpisode && (
@@ -554,9 +565,23 @@ export const ScheduleDetailModal: React.FC<ScheduleDetailModalProps> = ({
                     {displayUpcomingTitle || formatReleaseDate()}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/50 border border-amber-500/20 text-amber-200 font-medium text-[11px]">
-                  <Calendar className="w-3 h-3 text-amber-400" />
-                  <span>{displayUpcomingDate || formatReleaseDate()}</span>
+                <div className="flex items-center gap-2 ml-auto flex-wrap">
+                  {partInfo.isSplitCourOrPart && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-600 text-white font-black text-[10px] tracking-wide uppercase shadow-xs">
+                      Continuação
+                    </span>
+                  )}
+                  {anime.nextEpisode?.airingAt ? (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/50 border border-amber-500/30 text-amber-300 font-medium text-[11px]">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      <span>Ep. {anime.nextEpisode.episode || 1} ({formatCountdown(anime.nextEpisode.airingAt)})</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/50 border border-amber-500/20 text-amber-200 font-medium text-[11px]">
+                      <Calendar className="w-3 h-3 text-amber-400" />
+                      <span>{displayUpcomingDate || formatReleaseDate()}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               {effectiveAggregatedStatus.statusDescription && (

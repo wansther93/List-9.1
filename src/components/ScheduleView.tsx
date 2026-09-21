@@ -17,7 +17,6 @@ import {
   Bell,
   CheckCircle2,
   X,
-  Sparkles,
 } from 'lucide-react';
 import { HorizontalScrollContainer } from './HorizontalScrollContainer';
 import { ScheduleDetailModal } from './ScheduleDetailModal';
@@ -134,41 +133,41 @@ const ScheduleAnimeCard = React.memo<ScheduleAnimeCardProps>(({
         <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent pointer-events-none" />
 
-        {/* Top Left: Selo Oficial de Streaming no Brasil e Divisão em Cours */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
-          {streamingBadge && (
-            <span
-              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide border shadow-md backdrop-blur-md h-5 ${streamingBadge.badgeBg} ${streamingBadge.badgeBorder} ${streamingBadge.badgeText}`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${streamingBadge.dotColor} animate-pulse`} />
-              <span>{streamingBadge.name}</span>
-            </span>
-          )}
-          {partInfo.isSplitCourOrPart && (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8.5px] font-black tracking-wider uppercase bg-indigo-600 text-white shadow-md border border-indigo-400">
-              <Sparkles className="w-2.5 h-2.5 text-indigo-200 shrink-0" />
-              <span>{partInfo.partLabel}</span>
-            </span>
-          )}
-        </div>
-
-        {/* Top Right: Tag de Formato (exclusivo para Próxima Temporada) ou Nota com Estrela (Semana e Em Exibição) */}
-        {mainTab === 'season' && seasonSubTab === 'upcoming' ? (
-          item.format ? (
-            <div className="absolute top-2.5 right-2.5 z-10">
-              <span className="inline-flex items-center justify-center bg-black/90 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 text-[8.5px] font-black text-slate-200 uppercase tracking-wider shadow-md h-5">
-                {item.format}
+        {/* Barra superior de tags do pôster: Perfeitamente alinhadas na mesma linha horizontal */}
+        <div className="absolute top-2.5 inset-x-2.5 z-10 flex items-center justify-between gap-1 pointer-events-none">
+          {/* Lado Esquerdo: Selo de Streaming e/ou Tag Continuação */}
+          <div className="flex items-center gap-1 min-w-0">
+            {streamingBadge && (
+              <span
+                className={`inline-flex items-center gap-1.5 px-2 rounded-md text-[9px] font-black tracking-wide border shadow-md backdrop-blur-md h-5 whitespace-nowrap ${streamingBadge.badgeBg} ${streamingBadge.badgeBorder} ${streamingBadge.badgeText}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${streamingBadge.dotColor} animate-pulse`} />
+                <span>{streamingBadge.name}</span>
               </span>
-            </div>
-          ) : null
-        ) : item.score ? (
-          <div className="absolute top-2.5 right-2.5 z-10">
-            <span className="inline-flex items-center gap-1 bg-black/90 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-amber-500/30 text-[9px] font-black text-amber-300 shadow-md h-5">
-              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400 shrink-0" />
-              <span>{item.score.toFixed(1)}</span>
-            </span>
+            )}
+            {partInfo.isSplitCourOrPart && (
+              <span className="inline-flex items-center px-1.5 rounded-md text-[8.5px] font-black tracking-wider uppercase bg-indigo-600/95 text-white shadow-md border border-indigo-400/40 h-5 whitespace-nowrap">
+                Continuação
+              </span>
+            )}
           </div>
-        ) : null}
+
+          {/* Lado Direito: Tag de Formato (TV, MOVIE...) ou Nota */}
+          <div className="flex items-center gap-1 shrink-0 ml-auto">
+            {mainTab === 'season' && seasonSubTab === 'upcoming' ? (
+              item.format ? (
+                <span className="inline-flex items-center justify-center bg-black/90 backdrop-blur-md px-1.5 rounded-md border border-white/20 text-[8.5px] font-black text-slate-200 uppercase tracking-wider shadow-md h-5 whitespace-nowrap">
+                  {item.format}
+                </span>
+              ) : null
+            ) : item.score ? (
+              <span className="inline-flex items-center gap-1 bg-black/90 backdrop-blur-md px-1.5 rounded-md border border-amber-500/30 text-[9px] font-black text-amber-300 shadow-md h-5 whitespace-nowrap">
+                <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400 shrink-0" />
+                <span>{item.score.toFixed(1)}</span>
+              </span>
+            ) : null}
+          </div>
+        </div>
 
         {/* Bottom of Poster: Horário & Contagem Regressiva */}
         <div className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between gap-1">
@@ -239,12 +238,6 @@ const ScheduleAnimeCard = React.memo<ScheduleAnimeCardProps>(({
                 <span className="inline-flex items-center gap-1 text-[8.5px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
                   <Award className="w-2.5 h-2.5 text-amber-400" />
                   {finalEpLabels.badgeLabel}
-                </span>
-              )}
-              {partInfo.isSplitCourOrPart && (
-                <span className="inline-flex items-center gap-1 text-[8.5px] font-black px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase">
-                  <Sparkles className="w-2.5 h-2.5 text-indigo-400" />
-                  {partInfo.partLabel}
                 </span>
               )}
             </div>

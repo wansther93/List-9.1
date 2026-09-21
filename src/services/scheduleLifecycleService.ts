@@ -146,7 +146,7 @@ export function isFinalEpisodeOfSeason(item: ScheduleAnimeItem): boolean {
  */
 export interface AnimePartInfo {
   isSplitCourOrPart: boolean;
-  partLabel: string | null; // Ex: "Parte 2 (Continuação)", "Cour 2", "Parte 3 (Continuação)"
+  partLabel: string | null; // Apenas "Continuação"
 }
 
 /**
@@ -156,17 +156,12 @@ export interface AnimePartInfo {
 export function detectAnimePartInfo(title: string, englishTitle?: string): AnimePartInfo {
   const fullText = `${title || ''} ${englishTitle || ''}`.toLowerCase();
 
-  if (/(?:parte\s*2\b|part\s*2\b|2nd\s*cour\b|cour\s*2\b|part\s*ii\b|parte\s*ii\b)/i.test(fullText)) {
-    return { isSplitCourOrPart: true, partLabel: 'Parte 2 (Continuação)' };
-  }
-  if (/(?:parte\s*3\b|part\s*3\b|3rd\s*cour\b|cour\s*3\b|part\s*iii\b|parte\s*iii\b)/i.test(fullText)) {
-    return { isSplitCourOrPart: true, partLabel: 'Parte 3 (Continuação)' };
-  }
-  if (/(?:parte\s*4\b|part\s*4\b|4th\s*cour\b|cour\s*4\b|part\s*iv\b|parte\s*iv\b)/i.test(fullText)) {
-    return { isSplitCourOrPart: true, partLabel: 'Parte 4 (Continuação)' };
-  }
-  if (/(?:final\s*part\b|parte\s*final\b|kanketsu-hen)/i.test(fullText)) {
-    return { isSplitCourOrPart: true, partLabel: 'Parte Final (Conclusão)' };
+  if (
+    /(?:parte\s*\d+\b|part\s*\d+\b|\d+(?:st|nd|rd|th)\s*cour\b|cour\s*\d+\b|part\s*(?:ii|iii|iv|v)\b|parte\s*(?:ii|iii|iv|v)\b|final\s*part\b|parte\s*final\b|kanketsu-hen)/i.test(
+      fullText
+    )
+  ) {
+    return { isSplitCourOrPart: true, partLabel: 'Continuação' };
   }
 
   return { isSplitCourOrPart: false, partLabel: null };
