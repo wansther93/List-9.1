@@ -543,15 +543,12 @@ export const CollectionAnimeModal: React.FC<CollectionAnimeModalProps> = ({
             )}
           </div>
 
-          {/* Onde Assistir Legalmente no Brasil (100% Dinâmico das APIs) */}
+          {/* Onde Assistir Oficialmente no Brasil */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                <Tv className="w-3.5 h-3.5 text-amber-400" />
-                Onde Assistir Oficialmente no Brasil
-              </h3>
-              <span className="text-[10px] text-zinc-500 font-medium">Fontes Oficiais das APIs</span>
-            </div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 whitespace-nowrap">
+              <Tv className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Onde Assistir Oficialmente no Brasil</span>
+            </h3>
 
             {loadingStreaming ? (
               <div className="flex items-center gap-2 py-2.5 text-xs text-zinc-400 animate-pulse">

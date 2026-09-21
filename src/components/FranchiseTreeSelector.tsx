@@ -63,6 +63,7 @@ interface FranchiseTreeSelectorProps {
   onRemoveCustomArc?: (seasonId: string) => void;
   onSelectCurrentSeason?: (seasonName: string, totalEp: number | null, seasonId?: string) => void;
   onTriggerLoadMetadata?: (query: string) => void;
+  onOpenGuide?: () => void;
 }
 
 export const FranchiseTreeSelector: React.FC<FranchiseTreeSelectorProps> = ({
@@ -81,6 +82,7 @@ export const FranchiseTreeSelector: React.FC<FranchiseTreeSelectorProps> = ({
   onRemoveCustomArc,
   onSelectCurrentSeason,
   onTriggerLoadMetadata,
+  onOpenGuide,
 }) => {
   const [loading, setLoading] = useState(false);
   const [franchiseItems, setFranchiseItems] = useState<FranchiseTreeItem[]>([]);
@@ -310,14 +312,18 @@ export const FranchiseTreeSelector: React.FC<FranchiseTreeSelectorProps> = ({
           </div>
         </div>
 
-        {/* Linha dos Botões: Carregar Franquia Completa (à esquerda) e Como Funciona? (à direita, perfeitamente alinhado) */}
-        <div className="flex items-center justify-between gap-2 w-full pt-0.5">
+        {/* Linha do Botão: Carregar Franquia Completa (centralizado no meio) */}
+        <div className="flex items-center justify-center w-full pt-0.5">
           <button
             type="button"
             id="btn-load-franchise-tree"
             onClick={() => {
               if (!animeTitle.trim()) {
-                setIsGuideModalOpen(true);
+                if (onOpenGuide) {
+                  onOpenGuide();
+                } else {
+                  setIsGuideModalOpen(true);
+                }
                 return;
               }
               setIsTreeSelectorOpen(true);
@@ -327,7 +333,7 @@ export const FranchiseTreeSelector: React.FC<FranchiseTreeSelectorProps> = ({
               }
             }}
             disabled={loading}
-            className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/25 flex items-center justify-center gap-2 cursor-pointer"
             title={animeTitle.trim() ? "Detectar todas as temporadas e filmes da obra oficial" : "Digite o nome do anime ou veja como funciona"}
           >
             {loading ? (
@@ -341,17 +347,6 @@ export const FranchiseTreeSelector: React.FC<FranchiseTreeSelectorProps> = ({
                 <span>Carregar Franquia Completa</span>
               </>
             )}
-          </button>
-
-          <button
-            type="button"
-            id="btn-franchise-how-it-works"
-            onClick={() => setIsGuideModalOpen(true)}
-            className="px-2.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 text-amber-300 hover:text-amber-200 border border-amber-500/25 text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm"
-            title="Como funciona a seleção de temporadas e acompanhamento"
-          >
-            <Lightbulb className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span>Como funciona?</span>
           </button>
         </div>
       </div>
